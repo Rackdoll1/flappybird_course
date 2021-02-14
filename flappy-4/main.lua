@@ -110,7 +110,7 @@ function love.update(dt)
 	groundScroll = (groundScroll + GROUND_SCROLL_SPEED * dt)
 		% VIRTUAL_WIDTH
 
-	-- udate bird with its own logic
+	-- update bird with its own logic
 	bird:update(dt)
 
 	love.keyboard.keyPressed = {}

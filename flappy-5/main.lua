@@ -1,8 +1,8 @@
 --[[
     GD50
     Flappy Bird Remake
-	flappy-3
-	"The Gravity Update"
+	flappy-5
+	"The Infinite Pipe Update"
 
 	*BASED ON  CS50´s Introduction to Game Development course given by:
 
@@ -26,6 +26,8 @@ Class = require 'class'
 
 -- our own created classes
 require 'Bird'
+
+require 'Pipe'
 
 -- physical screen dimensions
 WINDOW_WIDTH = 1280
@@ -56,6 +58,12 @@ local BACKGROUND_LOOPING_POINT = 413
 -- our bird sprite
 local bird = Bird()
 
+-- keep track of the pipes that will be spawned
+local pipes = {}
+
+-- kep track of time passed for spawning pies
+local spawnTimer = 0
+
 -- called at the beginning of program execution
 function love.load()
 	-- texture scaling filter; set to nearest to avoid blurryness
@@ -64,12 +72,18 @@ function love.load()
 	-- displayed name at the top of the window
 	love.window.setTitle('Fifty Bird')
 
+	-- seed the rng
+	math.randomseed(os.time())
+
 	-- initialize virtual resolution
 	push:setupScreen(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, WINDOW_WIDTH, WINDOW_HEIGHT, {
 		vsync = true,
 		fullscreen = false,
 		resizable = true
 	})
+
+	-- initialize own defined input table called "keyPressed" (different from keypressed(), a function)
+	love.keyboard.keyPressed = {}
 end
 
 function love.resize(w,h)
@@ -78,8 +92,23 @@ end
 
 -- taking user input
 function love.keypressed(key)
+	-- add to our table of keys pressed this frame
+	love.keyboard.keyPressed[key] = true
+
 	if key == 'escape' then
 		love.event.quit()
+	end
+end
+
+--[[
+	New function used to check our global imut table for keys we activated during
+	this frame, looked up by their string value
+]]
+function love.keyboard.wasPressed(key)
+	if love.keyboard.keyPressed[key] then
+		return true
+	else
+		return false
 	end
 end
 
@@ -92,8 +121,28 @@ function love.update(dt)
 	groundScroll = (groundScroll + GROUND_SCROLL_SPEED * dt)
 		% VIRTUAL_WIDTH
 
+	spawnTimer = spawnTimer + dt
+
+	-- spawn a new Pipe after every two seconds and reset timer
+	if spawnTimer > 2 then
+		table.insert(pipes, Pipe())
+		spawnTimer = 0
+	end
+
 	-- update bird with its own logic
 	bird:update(dt)
+
+	-- iterate through pipes table returnig key-value pairs. (Key order is unspecified)
+	for k, pipe in pairs(pipes) do
+		pipe:update(dt)
+
+		if pipe.x < -pipe.width then
+			table.remove(pipes, k)
+		end
+	end
+
+	-- reset input table
+	love.keyboard.keyPressed = {}
 end
 
 function love.draw()
@@ -106,6 +155,11 @@ function love.draw()
 
 	-- draw the background at the negative looping point
 	love.graphics.draw(background, -backgroundScroll, 0)
+
+	-- draw all pipes in our scene (behind the ground)
+	for k, pipe in pairs(pipes) do
+		pipe:render()
+	end
 
 	-- draw the ground on top of the background, toward the bottom of the screen
 	-- at its negative looping point
