@@ -62,6 +62,7 @@ function Bird:update(dt)
 	if self.y < 0 then
 		self.y = math.max(0, self.y)
 		self.dy = 0.1
+		sounds['bump']:play()
 	end
 end
 

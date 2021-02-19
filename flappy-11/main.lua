@@ -91,6 +91,7 @@ function love.load()
 		['hurt'] = love.audio.newSource('Hurt.wav', 'static'),
 		['explosion'] = love.audio.newSource('Explosion.wav', 'static'),
 		['count'] = love.audio.newSource('Count.wav', 'static'),
+		['bump'] = love.audio.newSource('Bump.wav', 'static'),
 
 		['music'] = love.audio.newSource('marios_way.mp3', 'static')
 	}
