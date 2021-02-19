@@ -1,8 +1,8 @@
 --[[
     GD50
     Flappy Bird Remake
-	flappy-11
-	"The Audio Update"
+	flappy-12
+	"The Mouse Update"
 
 	*BASED ON  CS50´s Introduction to Game Development course given by:
 
@@ -122,8 +122,12 @@ function love.load()
  	sounds['music']:setLooping(true)
  	sounds['music']:play()
 
-	-- initialize own defined input table
+	-- initialize our keyboard input table
 	love.keyboard.keyPressed = {}
+
+	-- initialize mouse input tables
+	love.mouse.buttonPressed = {}
+
 end
 
 function love.resize(w,h)
@@ -141,11 +145,31 @@ function love.keypressed(key)
 end
 
 --[[
+    LÖVE2D callback fired each time a mouse button is pressed; gives us the
+    X and Y of the mouse, as well as the button in question.
+]]
+function love.mousepressed(x, y, button)
+	-- add button pressed to our table this frame
+	love.mouse.buttonPressed[button] = true
+end
+
+--[[
 	New function used to check our global input table for keys we activated during
 	this frame, looked up by their string value
 ]]
 function love.keyboard.wasPressed(key)
 	if love.keyboard.keyPressed[key] then
+		return true
+	else
+		return false
+	end
+end
+
+--[[
+    Equivalent to our keyboard function from before, but for the mouse buttons.
+]]
+function love.mouse.wasPressed(button)
+	if love.mouse.buttonPressed[button] then
 		return true
 	else
 		return false
@@ -165,6 +189,7 @@ function love.update(dt)
 	gStateMachine:update(dt)
 	-- reset input table
 	love.keyboard.keyPressed = {}
+	love.mouse.buttonPressed = {}
 end
 
 function love.draw()
