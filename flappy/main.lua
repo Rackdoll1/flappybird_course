@@ -34,6 +34,7 @@ require 'PipePair'
 require 'StateMachine'
 require 'states/BaseState'
 require 'states/CountdownState'
+require 'states/PauseState'
 require 'states/PlayState'
 require 'states/ScoreState'
 require 'states/TitleScreenState'
@@ -67,6 +68,8 @@ local BACKGROUND_LOOPING_POINT = 413
 -- point at which we should loop our ground back to X = 0
 local GROUND_LOOPING_POINT = 514
 
+ SCROLLING = true
+
 -- called at the beginning of program execution
 function love.load()
 	-- texture scaling filter; set to nearest to avoid blurryness
@@ -90,6 +93,7 @@ function love.load()
 		['explosion'] = love.audio.newSource('Explosion.wav', 'static'),
 		['count'] = love.audio.newSource('Count.wav', 'static'),
 		['bump'] = love.audio.newSource('Bump.wav', 'static'),
+		['pause'] = love.audio.newSource('Pause.wav', 'static'),
 
 		['music'] = love.audio.newSource('marios_way.mp3', 'static')
 	}
@@ -113,6 +117,7 @@ function love.load()
 		['countdown'] = function() return CountdownState() end,
 		['play'] = function() return PlayState() end,
 		['score'] = function() return ScoreState() end,
+		['pause'] = function() return PauseState() end,
  	}
  	gStateMachine:change('title')
 
@@ -175,13 +180,15 @@ function love.mouse.wasPressed(button)
 end
 
 function love.update(dt)
-	-- scroll background by preset speed * dt, looping back to 0 after the looping point
-	backgroundScroll = (backgroundScroll + BACKGROUND_SCROLL_SPEED * dt)
-		% BACKGROUND_LOOPING_POINT
+	if SCROLLING then
+		-- scroll background by preset speed * dt, looping back to 0 after the looping point
+		backgroundScroll = (backgroundScroll + BACKGROUND_SCROLL_SPEED * dt)
+			% BACKGROUND_LOOPING_POINT
 
-	-- scroll ground by preset speed * dt, looping back to 0 after the screen width passes
-	groundScroll = (groundScroll + GROUND_SCROLL_SPEED * dt)
-		% GROUND_LOOPING_POINT
+		-- scroll ground by preset speed * dt, looping back to 0 after the screen width passes
+		groundScroll = (groundScroll + GROUND_SCROLL_SPEED * dt)
+			% GROUND_LOOPING_POINT
+	end
 
 	-- now we just update the state machine, which defers to the right state
 	gStateMachine:update(dt)

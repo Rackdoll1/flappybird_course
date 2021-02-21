@@ -4,27 +4,27 @@
     cogden@cs50.harvard.edu
 
     The PlayState class is the bulk of the game, where the player actually controls the bird and
-    avoids pipes. When the player collides with a pipe, we should go to the GameOver state, where
+    avoids pipes. When the player collides with a pipe, we should go to the Score state, where
     we then go back to the main menu.
 ]]
 
 PlayState = Class{__includes = BaseState}
 
-function PlayState:init()
-	self.bird = Bird()
-	-- table of spawning PipePairs (instead of individual pipes)
-	self.pipePairs = {}
-	-- kep track of time passed for spawning pies
-	self.timer = 0
+function PlayState:enter(params)
+		self.bird = params.bird
+		self.pipePairs = params.pipePairs
+		self.timer = params.timer
+		self.score = params.score
+		self.lastY = params.lastY
+		self.pipeDistance = params.pipeDistance
+end
 
-	-- keep track of our score
-	self.score = 0
-
-	--  initialize our last recorded Y value for a gap placement to base other gaps off of
-	self.lastY = -PIPE_HEIGHT + math.random(80) + 20
-
-	-- random pipe distance
-	self.pipeDistance = 2
+function notEmpty(params)
+	if params then
+		return true
+	else
+		return false
+	end
 end
 
 function PlayState:update(dt)
@@ -35,9 +35,10 @@ function PlayState:update(dt)
 	if self.timer > self.pipeDistance  then
 		-- modify the last Y coordinate we placed so pipe gaps aren´t too far apart
 		-- no higher than 10 pixels below the top of the edge of the screen,
-		-- and no lower than a gap´s length (130 pixels from the bottom)
+		-- and no lower than the maximum gap height between pipes from the bottom,
+		-- including ground and bottom pipe images height
 		local y = math.max(-PIPE_HEIGHT + 10,
-			math.min(self.lastY + math.random(-50,50), VIRTUAL_HEIGHT - 80 - PIPE_HEIGHT))
+			math.min(self.lastY + math.random(-35,35), -PIPE_HEIGHT + (VIRTUAL_HEIGHT - MAX_GAP_HEIGHT - 26)))
 		self.lastY = y
 			
 		table.insert(self.pipePairs, PipePair(self.lastY))
@@ -103,6 +104,24 @@ function PlayState:update(dt)
 		gStateMachine:change('score', {
 					score = self.score
 				})
+	end
+
+	-- pressing p pauses the game, transitioning to the PauseState
+	if love.keyboard.wasPressed('p') then
+		sounds['music']:pause()
+		sounds['pause']:play()
+
+		SCROLLING = false
+
+
+		gStateMachine:change('pause', {
+			['bird'] = self.bird,
+			['pipePairs'] = self.pipePairs,
+			['timer'] = self.timer,
+			['score'] = self.score,
+			['lastY'] = self.lastY,
+			['pipeDistance'] = self.pipeDistance
+		})
 	end
 end
 

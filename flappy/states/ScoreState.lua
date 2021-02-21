@@ -10,12 +10,19 @@
 
 ScoreState = Class{__includes = BaseState}
 
+local bronce_Image = love.graphics.newImage('bronceM.png')
+local silver_Image = love.graphics.newImage('silverM.png')
+local gold_Image = love.graphics.newImage('goldM.png')
+
+-- for changing text y placement depending of medal earned
+local dinamicFont
 --[[
     When we enter the score state, we expect to receive the score
     from the play state so we know what to render to the State.
 ]]
 function ScoreState:enter(params)
 	self.score = params.score
+	dinamicFont = 0
 end
 
 function ScoreState:update(dt)
@@ -27,11 +34,23 @@ end
 
 function ScoreState:render()
 	-- simply render the score to the middle of the screen
+
 	love.graphics.setFont(flappyFont)
 	love.graphics.printf('Oof! You lost', 0, 64, VIRTUAL_WIDTH, 'center')
 
 	love.graphics.setFont(mediumFont)
 	love.graphics.printf('Score: ' ..tostring(self.score), 0, 100, VIRTUAL_WIDTH, 'center')
 
-	love.graphics.printf('Press Enter to Play Again', 0, 160, VIRTUAL_WIDTH, 'center')
+	if self.score > 2 then
+		dinamicFont = 60
+		love.graphics.printf('You earned a medal!', 0, 124, VIRTUAL_WIDTH, 'center')
+		if self.score > 7 then
+			love.graphics.draw(gold_Image, VIRTUAL_WIDTH / 2 - 25, 150)
+		elseif self.score > 4 then
+			love.graphics.draw(silver_Image, VIRTUAL_WIDTH / 2 - 25, 150)
+		elseif self.score > 2 then
+			love.graphics.draw(bronce_Image, VIRTUAL_WIDTH / 2 - 25, 150)
+		end
+	end
+	love.graphics.printf('Press Enter to Play Again', 0, 160 + dinamicFont, VIRTUAL_WIDTH, 'center')
 end

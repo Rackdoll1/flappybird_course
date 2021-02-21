@@ -10,6 +10,10 @@
 
 PipePair = Class{}
 
+-- minimum and maximum gap height for spawning pairs
+MIN_GAP_HEIGHT = 80
+MAX_GAP_HEIGHT = 130
+
 function PipePair:init(y)
 
 	-- initialize pipes past the right end of the screen
@@ -21,7 +25,7 @@ function PipePair:init(y)
 	-- instantiate two pipes that belong to this pair
 	self.pipes = {
 		['upper'] = Pipe('top', self.y),
-		['lower'] = Pipe('bottom', self.y + PIPE_HEIGHT + math.random(80, 130)) -- random gap height
+		['lower'] = Pipe('bottom', self.y + PIPE_HEIGHT + math.random(MIN_GAP_HEIGHT, MAX_GAP_HEIGHT)) -- random gap height
 	}
 
 	-- whenever this pipe is ready to be removed from the scene
